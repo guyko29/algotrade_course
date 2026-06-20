@@ -1,54 +1,38 @@
-# algotraid
+# TASE Optimal Portfolio Analyzer
 
-Small toolkit for **Tel Aviv Stock Exchange (TASE)** index data: a Streamlit dashboard with risk-style metrics and a Monte Carlo price forecast, plus a historical notebook.
+An educational dashboard that helps you understand how a specific Israeli stock fits into a simple, optimal portfolio.
 
-## What’s included
+## What it does
 
-- **`app.py`** — Streamlit UI (Hebrew labels). Pick an index or enter an index ID, date range, then load data. Shows annualized volatility, period return, historical 5% daily and annual downside (VaR-style), price chart, GBM-based Monte Carlo forecast (median and 5th–95th percentiles), raw table, and CSV download.
-- **`scraper.py`** — Fetches end-of-day index history from the public TASE API (`api.tase.co.il`).
-- **`analytics.py`** — Pure functions: price series, metrics, Monte Carlo simulation (no Streamlit dependency).
-- **`Robo_Adviser_Prod_20240529.ipynb`** — Standalone Jupyter analysis (run separately from the app).
+Enter a **TASE security number** and the app builds a three-asset portfolio:
 
-## Requirements
+**Your stock · Market index (TA-35) · Risk-free cash**
 
-- **Python 3.10+** (3.13 works with the pinned versions in `requirements.txt`).
-- **Network access** when using the dashboard or scraper (live API calls).
+It then shows:
 
-## Setup
+- **Risk profile** — volatility, beta, and correlations
+- **Return distribution** — how daily returns behave vs. a normal curve
+- **Downside scenarios** — worst-case loss estimates (5th percentile)
+- **Price forecast** — STL trend + GARCH volatility bands
+- **Optimal allocation** — Markowitz weights that maximize the Sharpe ratio
 
-From the project root:
+## Financial logic
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
+| Model | Role |
+|-------|------|
+| **Markowitz (1952)** | Finds the efficient mix of stock, index, and cash that offers the best risk-adjusted return |
+| **CAPM** | Measures how sensitive the stock is to the broader market (beta) and whether it earns excess return (alpha) |
+| **Historical VaR** | Estimates downside loss from real price history |
+| **STL + GARCH** | Separates trend/seasonality and models future volatility for price bands |
 
-## Run the dashboard
+## Who is it for?
 
-```bash
-streamlit run app.py
-```
+Students, analysts, and curious investors who want a **clear, visual explanation** of portfolio theory applied to a real TASE stock — not trading advice.
 
-Open the URL shown in the terminal (typically `http://localhost:8501`). Use the sidebar to choose an index, set dates, and click **טען נתונים**.
+## Quick start
 
-## Run the notebook
-
-```bash
-pip install jupyter ipykernel
-jupyter notebook Robo_Adviser_Prod_20240529.ipynb
-```
-
-## Project layout
-
-| Path | Role |
-|------|------|
-| `app.py` | Streamlit entrypoint |
-| `analytics.py` | Metrics and Monte Carlo |
-| `scraper.py` | TASE HTTP client |
-| `requirements.txt` | `streamlit`, `requests` (pandas/numpy come via Streamlit) |
-| `data/` | Used by the scraper for local artifacts when saving |
+See **[SETUP_LOCAL.md](SETUP_LOCAL.md)** for installation, environment setup, and how to run the app.
 
 ## Disclaimer
 
-This project is for **education and exploration only**. It is not investment advice. The TASE API may change or rate-limit; forecasts rely on simplified assumptions (e.g. GBM) and historical statistics.
+This tool is for **education and research only**. It is not investment advice. Market data comes from public TASE endpoints and may change without notice. Forecasts rely on simplified statistical models.

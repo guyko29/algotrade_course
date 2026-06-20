@@ -1,2 +1,20 @@
-streamlit==1.50.0
-requests==2.32.3
+# TASE Optimal Portfolio Analyzer
+# Python 3.10–3.12 (Streamlit Community Cloud compatible)
+#
+# Direct dependencies only — charts use Apache ECharts via CDN (no plotly /
+# streamlit-echarts package). ML stacks (scikit-learn, xgboost, tensorflow)
+# are not used by this app.
+
+# Web UI
+streamlit>=1.29.0,<2.0.0
+
+# Configuration & HTTP
+python-dotenv>=1.0.0,<2.0.0
+requests>=2.32.0,<3.0.0
+
+# Data & analytics
+numpy>=1.26.0,<3.0.0
+pandas>=2.2.0,<3.1.0
+scipy>=1.11.0,<2.0.0
+statsmodels>=0.14.0,<1.0.0
+arch>=7.0.0,<9.0.0
