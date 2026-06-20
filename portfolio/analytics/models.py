@@ -44,6 +44,41 @@ class PortfolioResult:
 
 
 @dataclass
+class MlForecastResult:
+    """Diagnostics for a single trained return-forecasting model."""
+
+    model_name: str
+    trained: bool
+    n_train_rows: int
+    cv_mae: float | None
+    cv_rmse: float | None
+    cv_r2: float | None
+    predicted_horizon_return: float
+    feature_importance: list[tuple[str, float]]
+
+
+@dataclass
+class ExpectedReturnsResult:
+    """Side-by-side expected daily returns: historical vs CAPM vs ML.
+
+    The ``stock_ml_daily`` / ``index_ml_daily`` values are already shrunk toward
+    the historical mean and clipped; they are what Markowitz actually consumes.
+    """
+
+    stock_historical_daily: float
+    index_historical_daily: float
+    stock_capm_daily: float
+    stock_ml_raw_daily: float
+    stock_ml_daily: float
+    index_ml_daily: float
+    shrinkage: float
+    used_ml: bool
+    stock_model: MlForecastResult
+    stock_baseline: MlForecastResult | None
+    index_model: MlForecastResult | None
+
+
+@dataclass
 class DistributionResult:
     bin_centers: list[float]
     counts: list[int]
@@ -87,3 +122,4 @@ class PortfolioAnalysis:
     gaussian: MonthlyGaussianResult | None
     forecast: PriceForecastResult | None
     rolling_volatility: pd.Series
+    expected_returns: ExpectedReturnsResult | None = None

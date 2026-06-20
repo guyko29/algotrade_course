@@ -2,8 +2,8 @@
 # Python 3.10–3.12 (Streamlit Community Cloud compatible)
 #
 # Direct dependencies only — charts use Apache ECharts via CDN (no plotly /
-# streamlit-echarts package). ML stacks (scikit-learn, xgboost, tensorflow)
-# are not used by this app.
+# streamlit-echarts package). Scikit-Learn + XGBoost power the ML expected-return
+# forecasting layer that feeds Markowitz/CAPM (see expected_returns.py).
 
 # Web UI
 streamlit>=1.29.0,<2.0.0
@@ -18,3 +18,7 @@ pandas>=2.2.0,<3.1.0
 scipy>=1.11.0,<2.0.0
 statsmodels>=0.14.0,<1.0.0
 arch>=7.0.0,<9.0.0
+
+# Machine learning — expected-return forecasting layer
+scikit-learn>=1.3.0,<2.0.0
+xgboost>=2.0.0,<4.0.0

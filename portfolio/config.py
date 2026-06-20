@@ -27,6 +27,10 @@ class Settings:
     default_risk_free_rate_annual: float
     lookback_years: int
     min_overlapping_trading_days: int
+    ml_model: str
+    ml_horizon_days: int
+    ml_min_train_rows: int
+    ml_shrinkage: float
 
 
 @lru_cache
@@ -50,4 +54,8 @@ def get_settings() -> Settings:
         default_risk_free_rate_annual=float(os.getenv("DEFAULT_RISK_FREE_RATE_ANNUAL", "0.045")),
         lookback_years=int(os.getenv("LOOKBACK_YEARS", "3")),
         min_overlapping_trading_days=int(os.getenv("MIN_OVERLAPPING_TRADING_DAYS", "60")),
+        ml_model=os.getenv("ML_MODEL", "xgboost").lower(),
+        ml_horizon_days=int(os.getenv("ML_HORIZON_DAYS", "21")),
+        ml_min_train_rows=int(os.getenv("ML_MIN_TRAIN_ROWS", "252")),
+        ml_shrinkage=float(os.getenv("ML_SHRINKAGE", "0.5")),
     )

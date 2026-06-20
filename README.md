@@ -14,6 +14,7 @@ It then shows:
 - **Return distribution** — how daily returns behave vs. a normal curve
 - **Downside scenarios** — worst-case loss estimates (5th percentile)
 - **Price forecast** — STL trend + GARCH volatility bands
+- **Expected-return forecast** — Historical vs CAPM vs ML side-by-side
 - **Optimal allocation** — Markowitz weights that maximize the Sharpe ratio
 
 ## Financial logic
@@ -24,6 +25,11 @@ It then shows:
 | **CAPM** | Measures how sensitive the stock is to the broader market (beta) and whether it earns excess return (alpha) |
 | **Historical VaR** | Estimates downside loss from real price history |
 | **STL + GARCH** | Separates trend/seasonality and models future volatility for price bands |
+| **ML return forecast** | Scikit-Learn / XGBoost predict the stock's forward drift from technical features |
+
+### Bridging financial theory and machine learning
+
+Classical portfolio theory needs one famously hard input: the **expected return (μ)**. Markowitz and CAPM are only as good as that estimate, yet the textbook default — the historical sample mean — is a noisy, backward-looking guess. This app keeps the theory as the decision framework but upgrades the *drift* assumption: a supervised model (XGBoost, with a Ridge baseline for interpretability) is trained on technical features (lagged returns, momentum, RSI, MACD, realized volatility) using **walk-forward, leakage-free validation** to forecast the stock's next-month return. That forecast is **shrunk toward the historical mean and clipped** for stability, then fed in as μ to the Markowitz optimizer — while the covariance matrix and GARCH volatility bands continue to model risk. The dashboard shows **Historical vs CAPM vs ML** expected returns side-by-side, so you can see exactly how a data-driven μ shifts the optimal allocation. The result is a concrete bridge between data-science tooling and financial theory rather than two disconnected exercises.
 
 ## Who is it for?
 

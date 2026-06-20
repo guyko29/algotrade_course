@@ -61,7 +61,15 @@ def optimize_max_sharpe_portfolio(
     stock_returns: pd.Series,
     index_returns: pd.Series,
     risk_free_rate_annual: float,
+    asset_expected_daily_returns: np.ndarray | None = None,
 ) -> PortfolioResult | None:
+    """Optimize the max-Sharpe portfolio over [Stock, Index, Risk-Free].
+
+    When ``asset_expected_daily_returns`` (a length-2 ``[stock, index]`` vector,
+    e.g. ML-informed drift) is provided it replaces the historical sample means as
+    the expected-return inputs; the risk-free leg is always the supplied rate.
+    Covariance and the efficient frontier always use the historical sample.
+    """
     aligned = pd.concat([stock_returns, index_returns], axis=1, join="inner").dropna()
     if len(aligned) < 30:
         return None
@@ -69,11 +77,12 @@ def optimize_max_sharpe_portfolio(
     aligned.columns = ["stock", "index"]
     risk_free_daily = risk_free_rate_annual / TRADING_DAYS_PER_YEAR
 
-    expected_daily_returns = np.array([
-        aligned["stock"].mean(),
-        aligned["index"].mean(),
-        risk_free_daily,
-    ])
+    if asset_expected_daily_returns is not None:
+        stock_mu, index_mu = float(asset_expected_daily_returns[0]), float(asset_expected_daily_returns[1])
+    else:
+        stock_mu, index_mu = float(aligned["stock"].mean()), float(aligned["index"].mean())
+
+    expected_daily_returns = np.array([stock_mu, index_mu, risk_free_daily])
     covariance_2x2 = aligned.cov().values
     covariance = np.zeros((3, 3))
     covariance[:2, :2] = covariance_2x2
@@ -100,12 +109,12 @@ def optimize_max_sharpe_portfolio(
     asset_stats = [
         {
             "name": PORTFOLIO_ASSET_LABELS[0],
-            "return": _annualize_return(float(aligned["stock"].mean())),
+            "return": _annualize_return(stock_mu),
             "vol": _annualize_volatility(float(aligned["stock"].std(ddof=1))),
         },
         {
             "name": PORTFOLIO_ASSET_LABELS[1],
-            "return": _annualize_return(float(aligned["index"].mean())),
+            "return": _annualize_return(index_mu),
             "vol": _annualize_volatility(float(aligned["index"].std(ddof=1))),
         },
         {
