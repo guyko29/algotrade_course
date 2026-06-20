@@ -60,11 +60,16 @@ def calculate_return_distribution(returns: pd.Series, bins: int = 30) -> Distrib
     return DistributionResult(bin_centers=centers, counts=counts, normal_x=xs.tolist(), normal_y=ys)
 
 
-def calculate_monthly_gaussian_risk(returns: pd.Series) -> MonthlyGaussianResult | None:
+def calculate_monthly_gaussian_risk(
+    returns: pd.Series,
+    expected_daily_return: float | None = None,
+) -> MonthlyGaussianResult | None:
     if returns.empty:
         return None
 
-    monthly_mean = float(returns.mean() * MONTHLY_TRADING_DAYS)
+    # Use the ML-informed daily drift when supplied, else the historical sample mean.
+    daily_drift = float(returns.mean()) if expected_daily_return is None else float(expected_daily_return)
+    monthly_mean = daily_drift * MONTHLY_TRADING_DAYS
     monthly_std = float(returns.std(ddof=1) * np.sqrt(MONTHLY_TRADING_DAYS))
     xs = np.linspace(monthly_mean - 4 * monthly_std, monthly_mean + 4 * monthly_std, 200)
     density = norm.pdf(xs, monthly_mean, monthly_std)

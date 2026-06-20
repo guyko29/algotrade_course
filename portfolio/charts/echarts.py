@@ -88,6 +88,35 @@ def render_allocation_bar_chart(title: str, categories: list[str], weights_pct: 
     )
 
 
+def render_feature_importance_chart(
+    title: str,
+    features: list[str],
+    importances: list[float],
+    height: int = 320,
+) -> None:
+    # Horizontal bars, most important at the top (ECharts y-axis plots bottom-up).
+    categories = list(reversed(features))
+    values = [round(float(value) * 100, 2) for value in reversed(importances)]
+    _render_echarts_option(
+        {
+            "title": {"text": title, "left": "center"},
+            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "grid": {"left": 130, "right": 40, "top": 56, "bottom": 40},
+            "xAxis": {"type": "value", "name": "Importance %"},
+            "yAxis": {"type": "category", "data": categories},
+            "series": [
+                {
+                    "type": "bar",
+                    "data": values,
+                    "itemStyle": {"color": "#91cc75"},
+                    "label": {"show": True, "formatter": "{c}%", "position": "right"},
+                }
+            ],
+        },
+        height=height,
+    )
+
+
 def render_correlation_heatmap(title: str, labels: list[str], matrix: list[list[float]], height: int = 360) -> None:
     data = [[j, i, round(float(value), 3)] for i, row in enumerate(matrix) for j, value in enumerate(row)]
     _render_echarts_option(

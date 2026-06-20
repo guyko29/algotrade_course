@@ -6,6 +6,7 @@ from datetime import date
 from typing import Callable, Optional
 
 from portfolio.analytics.capm import calculate_capm
+from portfolio.analytics.expected_returns import build_expected_returns, markowitz_asset_vector
 from portfolio.analytics.forecast import forecast_price_stl_garch
 from portfolio.analytics.markowitz import optimize_max_sharpe_portfolio
 from portfolio.analytics.models import PortfolioAnalysis
@@ -101,6 +102,21 @@ class PortfolioAnalysisService:
         if metrics is None:
             raise InsufficientDataError("Could not compute stock metrics")
 
+        capm = calculate_capm(stock_returns, index_returns, risk_free_rate_annual)
+
+        if on_progress:
+            on_progress(0.92, "Training ML return forecast...")
+
+        expected_returns = build_expected_returns(
+            stock_prices=stock_prices,
+            index_prices=index_prices,
+            stock_returns=stock_returns,
+            index_returns=index_returns,
+            capm_result=capm,
+            settings=self._settings,
+        )
+        asset_mu = markowitz_asset_vector(expected_returns) if expected_returns.used_ml else None
+
         analysis = PortfolioAnalysis(
             stock_id=stock_id,
             benchmark_id=benchmark_used,
@@ -110,12 +126,18 @@ class PortfolioAnalysisService:
             index_prices=index_prices,
             stock_returns=stock_returns,
             metrics=metrics,
-            capm=calculate_capm(stock_returns, index_returns, risk_free_rate_annual),
-            portfolio=optimize_max_sharpe_portfolio(stock_returns, index_returns, risk_free_rate_annual),
+            capm=capm,
+            portfolio=optimize_max_sharpe_portfolio(
+                stock_returns, index_returns, risk_free_rate_annual, asset_mu
+            ),
             distribution=calculate_return_distribution(stock_returns),
-            gaussian=calculate_monthly_gaussian_risk(stock_returns),
+            gaussian=calculate_monthly_gaussian_risk(
+                stock_returns,
+                expected_returns.stock_ml_daily if expected_returns.used_ml else None,
+            ),
             forecast=forecast_price_stl_garch(stock_prices),
             rolling_volatility=calculate_rolling_annualized_volatility(stock_returns).dropna(),
+            expected_returns=expected_returns,
         )
 
         logger.info(
